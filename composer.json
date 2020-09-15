@@ -1,0 +1,24 @@
+{
+    "name": "hashemi/valideto",
+    "description": "A simple validation package for valideto",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Hashemi Rafsan",
+            "email": "rafsanhashemi@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.4|^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Hashemi\\Valideto\\": "src/"
+        }
+    }
+}
