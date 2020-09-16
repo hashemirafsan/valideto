@@ -7,6 +7,10 @@ namespace Hashemi\Valideto\Engine;
 use Hashemi\Valideto\Rules\CustomRule\CustomRuleInterface;
 use Hashemi\Valideto\Rules\DefaultRulesInterface;
 
+/**
+ * Class ValidetoEngine
+ * @package Hashemi\Valideto\Engine
+ */
 abstract class ValidetoEngine
 {
 
@@ -45,11 +49,11 @@ abstract class ValidetoEngine
         'nullable',
         'distinct',
         'date',
+        'date_format',
         'array',
         'url',
         'ip',
         'boolean',
-        'date_format',
         'email',
         'string',
         'digits',
@@ -67,19 +71,20 @@ abstract class ValidetoEngine
         'required' => 'This :attribute is required',
         'max' => 'This :attribute exceed max value',
         'min' => 'This :attribute expect at least min value',
-        'array' => 'This :attribute should be array',
-        'assoc' => 'This :attribute is not associative array',
-        'size' => 'This :attribute length should be :value',
-        'distinct' => 'This :attribute has duplicate value',
-        'string' => 'This :attribute should be string',
-        'numeric' => 'This :attribute should be numeric',
-        'integer' => 'This :attribute should be integer',
-        'float' => 'This :attribute should be float',
         'gt' => 'This :attribute should be greater than :value',
         'gte' => 'This :attribute should be greater than or equal to :value',
         'lt' => 'This :attribute should be less than :value',
         'lte' => 'This :attribute should be less than or equal to :value',
         'eq' => 'This :attribute should be equal to :value',
+        'boolean' => 'This :attribute is not boolean',
+        'array' => 'This :attribute should be array',
+        'distinct' => 'This :attribute has duplicate value',
+        'assoc' => 'This :attribute is not associative array',
+        'size' => 'This :attribute length should be :value',
+        'string' => 'This :attribute should be string',
+        'numeric' => 'This :attribute should be numeric',
+        'integer' => 'This :attribute should be integer',
+        'float' => 'This :attribute should be float',
         'email' => 'This :attribute is not valid email',
         'url' => 'This :attribute is not valid url',
         'ip' => 'This :attribute is not valid ip',
@@ -150,47 +155,16 @@ abstract class ValidetoEngine
     protected function isValidateByRules(string $key, array $rules): bool
     {
         $isValid = true;
+        $isNullable = false;
 
         foreach($rules as $rule) {
             if (is_string($rule)) {
-                $isNullable = false;
-                $rule = explode(':', $rule);
-                $methodName = $rule[0];
-                $rule[0] = $key;
-                $method = sprintf("is%s", str_replace(' ', '', ucwords(str_replace('_', '', $methodName))));
-                $params = $rule;
-
-                if ($methodName === 'nullable') {
-                    $isNullable = true;
-                }
-
-                if ($isNullable) {
-                    $params[] = true;
-                }
-
-                $totalParams = count($params);
-
-                if ($this->isRuleDefaultPreset($methodName)) {
-                    if (! call_user_func_array([$this->getRulesClass(), $method], $params) && $methodName !== 'nullable') {
-
-                        $this->errorMessages[$key][$methodName] = preg_replace('/:attribute/i', $key, $this->getMessages($methodName));
-
-                        if ( $totalParams > 0) {
-                            $this->errorMessages[$key][$methodName] = preg_replace('/:value/i', $params[$totalParams - 1], $this->errorMessages[$key][$methodName]);
-                        }
-
-                        $isValid &= false;
-                    }
-                }
+                $isValid &= $this->processDefaultPresetRule($key, $rule, $isValid, $isNullable);
             }
 
             if ($rule instanceof CustomRuleInterface) {
-                if (! $rule->process($this->data[$key])) {
-                    $isValid &= false;
-                    $this->errorMessages[$key][$rule->ruleName()] = $rule->message();
-                }
+                $isValid &= $this->processCustomRule($rule, $key, $isValid, $isNullable);
             }
-
         }
 
         return (bool) $isValid;
@@ -219,5 +193,63 @@ abstract class ValidetoEngine
     public function isRuleDefaultPreset(string $rule): bool
     {
         return in_array($rule, $this->presets);
+    }
+
+    /**
+     * @param string $fieldName
+     * @param string $rule
+     * @param $isValid
+     * @param $isNullable
+     * @return bool
+     */
+    private function processDefaultPresetRule(string $fieldName, string $rule, &$isValid, &$isNullable): bool
+    {
+        $rule = explode(':', $rule);
+        $methodName = $rule[0];
+
+        $rule[0] = $fieldName;
+        $method = sprintf("is%s", str_replace(' ', '', ucwords(str_replace('_', '', $methodName))));
+
+        $params = $rule;
+
+        if ($methodName === 'nullable') {
+            $isNullable = true;
+        }
+
+        if ($isNullable) {
+            $params[] = true;
+        }
+
+        $totalParams = count($params);
+
+        if (! call_user_func_array([$this->getRulesClass(), $method], $params) && $methodName !== 'nullable') {
+
+            $this->errorMessages[$fieldName][$methodName] = preg_replace('/:attribute/i', $fieldName, $this->getMessages($methodName));
+
+            if ( $totalParams > 0) {
+                $this->errorMessages[$fieldName][$methodName] = preg_replace('/:value/i', $params[$totalParams - 1], $this->errorMessages[$fieldName][$methodName]);
+            }
+
+            $isValid &= false;
+        }
+
+        return (bool) $isValid;
+    }
+
+    /**
+     * @param CustomRuleInterface $rule
+     * @param string $key
+     * @param $isValid
+     * @param $isNullable
+     * @return bool
+     */
+    private function processCustomRule(CustomRuleInterface $rule, string $key, &$isValid, &$isNullable): bool
+    {
+        if (! $rule->process($this->data[$key], $isNullable)) {
+            $isValid &= false;
+            $this->errorMessages[$key][$rule->ruleName()] = $rule->message();
+        }
+
+        return (bool) $isValid;
     }
 }

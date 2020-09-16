@@ -11,7 +11,7 @@ class MyCustomRule implements CustomRuleInterface
         return 'my_custom_rule';
     }
 
-    public function process($value): bool
+    public function process($value, bool $isNullable): bool
     {
         return $value === "Hashemi Rafsan";
     }
