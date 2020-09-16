@@ -1,8 +1,14 @@
 {
     "name": "hashemi/valideto",
-    "description": "A simple validation package for valideto",
+    "description": "A simple PHP package for data validation with extensive preset rules and custom rules.",
     "type": "library",
     "license": "MIT",
+    "keywords": [
+        "validation",
+        "data-validation",
+        "php",
+        "array-validation"
+    ],
     "authors": [
         {
             "name": "Hashemi Rafsan",
