@@ -3,7 +3,7 @@
 use Hashemi\Valideto\Valideto;
 use PHPUnit\Framework\TestCase;
 
-class ValidetoTest extends TestCase
+class ValidetoEngineTest extends TestCase
 {
     public function testValidatedData()
     {
@@ -74,72 +74,16 @@ class ValidetoTest extends TestCase
         ], $validator->getErrorMessages());
     }
 
-    public function testArray()
+    public function testNullable()
     {
-        $data = [
-            'hobbies' => [
-                'cricket',
-                'badminton',
-                'programming'
-            ]
-        ];
+        $data = [];
 
         $validator = new Valideto($data, [
-            'hobbies' => ['array']
-        ]);
-
-        self::assertSame($data, $validator->validate());
-    }
-
-    public function testArrayFailedMessage()
-    {
-        $data = [
-            'hobbies' => null
-        ];
-
-        $validator = new Valideto($data, [
-            'hobbies' => ['array']
+            'first_name' => ['nullable']
         ]);
 
         $validator->validate();
 
-        self::assertSame([
-            'hobbies' => [
-                'array' => 'This hobbies should be array'
-            ]
-        ], $validator->getErrorMessages());
-    }
-
-    public function testString()
-    {
-        $data = [
-            'first_name' => ['string']
-        ];
-
-        $validator = new Valideto($data, [
-            'first_name' => ['string']
-        ]);
-
         self::assertSame($data, $validator->validate());
     }
-
-    public function testStringFailedMessage()
-    {
-        $data = [
-            'first_name' => null
-        ];
-
-        $validator = new Valideto($data, [
-            'first_name' => ['string']
-        ]);
-
-        $validator->validate();
-
-        self::assertSame([
-            'first_name' => [
-                'string' => 'This first_name should be string'
-            ]
-        ], $validator->getErrorMessages());
-    }
-
 }

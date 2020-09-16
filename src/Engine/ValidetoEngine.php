@@ -87,7 +87,9 @@ abstract class ValidetoEngine
         $isValidated = true;
         foreach ($this->getRules() as $key => $rules) {
             if ($isValidated &= $this->isValidateByRules($key, $rules)) {
-                $data[$key] = $this->data[$key];
+                if($this->rulesClass->isRequired($key)) {
+                    $data[$key] = $this->data[$key];
+                }
             }
         }
 
@@ -102,6 +104,8 @@ abstract class ValidetoEngine
     protected function isValidateByRules(string $key, array $rules): bool
     {
         $isValid = true;
+        $isNullable = false;
+
         foreach($rules as $rule) {
             $rule = explode(':', $rule);
             $method = sprintf("is%s", ucfirst($rule[0]));
@@ -109,6 +113,14 @@ abstract class ValidetoEngine
 
             if (count($rule) > 1) {
                 $param[] = $rule[1];
+            }
+
+            if ($rule === 'nullable') {
+                $isNullable = true;
+            }
+
+            if ($isNullable) {
+                $param[] = true;
             }
 
             if (! call_user_func_array([$this->getRulesClass(), $method], $param)) {
