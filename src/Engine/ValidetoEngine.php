@@ -197,7 +197,7 @@ abstract class ValidetoEngine
      */
     public function success(): bool
     {
-        return (bool) count($this->getErrorMessages());
+        return (bool) !count($this->getErrorMessages());
     }
 
     /**
