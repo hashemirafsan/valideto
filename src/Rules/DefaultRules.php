@@ -18,34 +18,6 @@ class DefaultRules implements DefaultRulesInterface
     /**
      * @var string[]
      */
-    protected $presets = [
-        'required',
-        'max',
-        'min',
-        'gt',
-        'gte',
-        'lt',
-        'lte',
-        'eq',
-        'capital_letter',
-        'small_letter',
-        'nullable',
-        'distinct',
-        'date',
-        'array',
-        'url',
-        'ip',
-        'boolean',
-        'date_format',
-        'email',
-        'string',
-        'digits',
-        'size',
-        'numeric',
-        'integer',
-        'float',
-        'assoc',
-    ];
 
     /**
      * @param array $data

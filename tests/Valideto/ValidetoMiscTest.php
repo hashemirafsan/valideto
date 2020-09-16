@@ -102,4 +102,40 @@ class ValidetoMiscTest extends TestCase
         ], $validator->getErrorMessages());
     }
 
+    public function testCustomRule()
+    {
+        $data = [
+            'name' => 'Hashemi Rafsan'
+        ];
+
+        $customRule = new MyCustomRule();
+
+        $validator = new Valideto($data, [
+            'name' => [$customRule]
+        ]);
+
+
+        $this->assertSame($data, $validator->validate());
+    }
+
+    public function testCustomRuleFailsMessage()
+    {
+        $data = [
+            'name' => 'Rafsan Jani'
+        ];
+
+        $customRule = new MyCustomRule();
+
+        $validator = new Valideto($data, [
+            'name' => [$customRule]
+        ]);
+
+        $validator->validate();
+
+        $this->assertSame([
+            'name' => [
+                $customRule->ruleName() => $customRule->message()
+            ]
+        ], $validator->getErrorMessages());
+    }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Hashemi\Valideto\Engine;
 
+use Hashemi\Valideto\Rules\CustomRule\CustomRuleInterface;
 use Hashemi\Valideto\Rules\DefaultRulesInterface;
 
 abstract class ValidetoEngine
@@ -28,6 +29,36 @@ abstract class ValidetoEngine
      * @var null
      */
     private $rulesClass = null;
+
+    /**
+     * @var string[]
+     */
+    protected $presets = [
+        'required',
+        'max',
+        'min',
+        'gt',
+        'gte',
+        'lt',
+        'lte',
+        'eq',
+        'nullable',
+        'distinct',
+        'date',
+        'array',
+        'url',
+        'ip',
+        'boolean',
+        'date_format',
+        'email',
+        'string',
+        'digits',
+        'size',
+        'numeric',
+        'integer',
+        'float',
+        'assoc',
+    ];
 
     /**
      * @var array
@@ -115,35 +146,47 @@ abstract class ValidetoEngine
     protected function isValidateByRules(string $key, array $rules): bool
     {
         $isValid = true;
-        $isNullable = false;
 
         foreach($rules as $rule) {
-            $rule = explode(':', $rule);
-            $methodName = $rule[0];
-            $rule[0] = $key;
-            $method = sprintf("is%s", str_replace(' ', '', ucwords(str_replace('_', '', $methodName))));
-            $params = $rule;
+            if (is_string($rule)) {
+                $isNullable = false;
+                $rule = explode(':', $rule);
+                $methodName = $rule[0];
+                $rule[0] = $key;
+                $method = sprintf("is%s", str_replace(' ', '', ucwords(str_replace('_', '', $methodName))));
+                $params = $rule;
 
-            if ($methodName === 'nullable') {
-                $isNullable = true;
-            }
-
-            if ($isNullable) {
-                $params[] = true;
-            }
-
-            $totalParams = count($params);
-
-            if (! call_user_func_array([$this->getRulesClass(), $method], $params) && $methodName !== 'nullable') {
-
-                $this->errorMessages[$key][$methodName] = preg_replace('/:attribute/i', $key, $this->getMessages($methodName));
-
-                if ( $totalParams > 0) {
-                    $this->errorMessages[$key][$methodName] = preg_replace('/:value/i', $params[$totalParams - 1], $this->errorMessages[$key][$methodName]);
+                if ($methodName === 'nullable') {
+                    $isNullable = true;
                 }
 
-                $isValid &= false;
+                if ($isNullable) {
+                    $params[] = true;
+                }
+
+                $totalParams = count($params);
+
+                if ($this->isRuleDefaultPreset($methodName)) {
+                    if (! call_user_func_array([$this->getRulesClass(), $method], $params) && $methodName !== 'nullable') {
+
+                        $this->errorMessages[$key][$methodName] = preg_replace('/:attribute/i', $key, $this->getMessages($methodName));
+
+                        if ( $totalParams > 0) {
+                            $this->errorMessages[$key][$methodName] = preg_replace('/:value/i', $params[$totalParams - 1], $this->errorMessages[$key][$methodName]);
+                        }
+
+                        $isValid &= false;
+                    }
+                }
             }
+
+            if ($rule instanceof CustomRuleInterface) {
+                if (! $rule->process($this->data[$key])) {
+                    $isValid &= false;
+                    $this->errorMessages[$key][$rule->ruleName()] = $rule->message();
+                }
+            }
+
         }
 
         return (bool) $isValid;
@@ -163,5 +206,14 @@ abstract class ValidetoEngine
     public function fails(): bool
     {
         return count($this->getErrorMessages()) > 0;
+    }
+
+    /**
+     * @param string $rule
+     * @return bool
+     */
+    public function isRuleDefaultPreset(string $rule): bool
+    {
+        return in_array($rule, $this->presets);
     }
 }
