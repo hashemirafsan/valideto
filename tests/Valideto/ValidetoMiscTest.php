@@ -138,4 +138,69 @@ class ValidetoMiscTest extends TestCase
             ]
         ], $validator->getErrorMessages());
     }
+
+    public function testDate()
+    {
+        $data = [
+            'start_time' => '2018-09-09 12:12:12'
+        ];
+
+        $validator = new Valideto($data, [
+            'start_time' => ['date']
+        ]);
+
+        $this->assertSame($data, $validator->validate());
+    }
+
+    public function testDateFailsMessage()
+    {
+        $data = [
+            'start_time' => 'rafsan'
+        ];
+
+        $validator = new Valideto($data, [
+            'start_time' => ['date']
+        ]);
+
+        $validator->validate();
+
+        $this->assertSame([
+            'start_time' => [
+                'date' => 'This start_time is not valid date'
+            ]
+        ], $validator->getErrorMessages());
+    }
+
+    public function testDateFormat()
+    {
+        $data = [
+            'start_time' => '09/09/2018'
+        ];
+
+        $validator = new Valideto($data, [
+            'start_time' => ['date_format:d/m/Y']
+        ]);
+
+        $this->assertSame($data, $validator->validate());
+    }
+
+    public function testDateFormatFailsMessage()
+    {
+        $data = [
+            'start_time' => '09/09/2018'
+        ];
+
+        $validator = new Valideto($data, [
+            'start_time' => ['date_format:d-m-Y']
+        ]);
+
+        $validator->validate();
+
+        $this->assertSame([
+            'start_time' => [
+                'date_format' => 'This start_time is not valid date format'
+            ]
+        ], $validator->getErrorMessages());
+    }
+
 }

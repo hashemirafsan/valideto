@@ -433,4 +433,50 @@ class DefaultRules implements DefaultRulesInterface
 
         return false;
     }
+
+    /**
+     * @param string $key
+     * @param bool $nullable
+     * @return bool
+     */
+    public function isDate(string $key, bool $nullable = false): bool
+    {
+        if ($nullable && $this->isNullable($key)) {
+            return true;
+        }
+
+        if ($this->isRequired($key)) {
+            try {
+                return (bool) ((new \DateTime($this->data[$key])));
+            } catch (\Exception $exception) {
+                return false;
+            }
+
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $key
+     * @param string $value
+     * @param bool $nullable
+     * @return bool
+     */
+    public function isDateFormat(string $key, string $value, bool $nullable = false): bool
+    {
+        if ($nullable && $this->isNullable($key)) {
+            return true;
+        }
+
+        if ($this->isRequired($key)) {
+            try {
+                return ((new \DateTime($this->data[$key])))->format($value) === $this->data[$key];
+            } catch (\Exception $exception) {
+                return false;
+            }
+        }
+
+        return false;
+    }
 }

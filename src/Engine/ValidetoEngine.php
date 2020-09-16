@@ -66,7 +66,9 @@ abstract class ValidetoEngine
     protected $messages = [
         'required' => 'This :attribute is required',
         'max' => 'This :attribute exceed max value',
+        'min' => 'This :attribute expect at least min value',
         'array' => 'This :attribute should be array',
+        'assoc' => 'This :attribute is not associative array',
         'size' => 'This :attribute length should be :value',
         'distinct' => 'This :attribute has duplicate value',
         'string' => 'This :attribute should be string',
@@ -80,7 +82,9 @@ abstract class ValidetoEngine
         'eq' => 'This :attribute should be equal to :value',
         'email' => 'This :attribute is not valid email',
         'url' => 'This :attribute is not valid url',
-        'ip' => 'This :attribute is not valid ip'
+        'ip' => 'This :attribute is not valid ip',
+        'date' => 'This :attribute is not valid date',
+        'date_format' => 'This :attribute is not valid date format',
     ];
 
     public function setRulesClass(DefaultRulesInterface $rulesClass): ValidetoEngine
