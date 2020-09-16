@@ -1,4 +1,4 @@
-#Valideto
+# Valideto
 A simple PHP package for data validation with extensive preset rules and custom rules.
 
 ## Installation
