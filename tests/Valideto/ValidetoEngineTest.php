@@ -11,6 +11,7 @@ class ValidetoEngineTest extends TestCase
             'first_name' => 'Hashemi',
             'last_name' => 'Rafsan',
             'age' => 24,
+            'experience' => 1.2,
             'hobbies' => [
                 'cricket',
                 'programming'
@@ -20,7 +21,8 @@ class ValidetoEngineTest extends TestCase
         $validator = new Valideto($data, [
             'first_name' => ['required', 'string'],
             'last_name' => ['required', 'string'],
-            'age' => ['required', 'numeric'],
+            'age' => ['required', 'numeric', 'integer'],
+            'experience' => ['required', 'numeric', 'float'],
             'hobbies' => ['array']
         ]);
 

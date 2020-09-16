@@ -9,14 +9,12 @@ class ValidetoStringTest extends TestCase
     public function testString()
     {
         $data = [
-            'first_name' => ['string']
+            'first_name' => 'string'
         ];
 
         $validator = new Valideto($data, [
             'first_name' => ['string']
         ]);
-
-        $validator->validate();
 
         self::assertSame($data, $validator->validate());
     }

@@ -38,7 +38,15 @@ abstract class ValidetoEngine
         'array' => 'This :attribute should be array',
         'size' => 'This :attribute length should be :value',
         'distinct' => 'This :attribute has duplicate value',
-        'string' => 'This :attribute should be string'
+        'string' => 'This :attribute should be string',
+        'numeric' => 'This :attribute should be numeric',
+        'integer' => 'This :attribute should be integer',
+        'float' => 'This :attribute should be float',
+        'gt' => 'This :attribute should be greater than :value',
+        'gte' => 'This :attribute should be greater than or equal to :value',
+        'lt' => 'This :attribute should be less than :value',
+        'lte' => 'This :attribute should be less than or equal to :value',
+        'eq' => 'This :attribute should be equal to :value'
     ];
 
     public function setRulesClass(DefaultRulesInterface $rulesClass): ValidetoEngine
@@ -108,30 +116,34 @@ abstract class ValidetoEngine
 
         foreach($rules as $rule) {
             $rule = explode(':', $rule);
-            $method = sprintf("is%s", ucfirst($rule[0]));
-            $param = [$key];
+            $methodName = $rule[0];
+            $rule[0] = $key;
+            $method = sprintf("is%s", str_replace(' ', '', ucwords(str_replace('_', '', $methodName))));
+            $params = $rule;
 
-            if (count($rule) > 1) {
-                $param[] = $rule[1];
-            }
-
-            if ($rule === 'nullable') {
+            if ($methodName === 'nullable') {
                 $isNullable = true;
             }
 
             if ($isNullable) {
-                $param[] = true;
+                $params[] = true;
             }
 
-            if (! call_user_func_array([$this->getRulesClass(), $method], $param)) {
-                $this->errorMessages[$key][$rule[0]] = preg_replace('/:attribute/i',$key,$this->getMessages($rule[0]));
+            $totalParams = count($params);
 
-                if (count($param) > 1) {
-                    $this->errorMessages[$key][$rule[0]] = preg_replace('/:value/i', $param[1], $this->errorMessages[$key][$rule[0]]);
+            if (! call_user_func_array([$this->getRulesClass(), $method], $params) && $methodName !== 'nullable') {
+
+                $this->errorMessages[$key][$methodName] = preg_replace('/:attribute/i', $key, $this->getMessages($methodName));
+
+                if ( $totalParams > 0) {
+                    $this->errorMessages[$key][$methodName] = preg_replace('/:value/i', $params[$totalParams - 1], $this->errorMessages[$key][$methodName]);
                 }
+
+                $isValid &= false;
             }
         }
-        return $isValid;
+
+        return (bool) $isValid;
     }
 
     /**

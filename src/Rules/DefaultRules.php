@@ -26,6 +26,9 @@ class DefaultRules implements DefaultRulesInterface
         'gte',
         'lt',
         'lte',
+        'eq',
+        'capital_letter',
+        'small_letter',
         'nullable',
         'distinct',
         'date',
@@ -59,8 +62,8 @@ class DefaultRules implements DefaultRulesInterface
      */
     public function isRequired(string $key): bool
     {
-        if (isset($this->data[$key])) {
-            return !empty($this->data[$key]) && ! is_null($this->data[$key]);
+        if (array_key_exists($key, $this->data)) {
+            return !empty($this->data[$key]) && !is_null($this->data[$key]);
         }
         return false;
     }
@@ -71,7 +74,11 @@ class DefaultRules implements DefaultRulesInterface
      */
     public function isNullable(string $key): bool
     {
-        return true;
+        if (! array_key_exists($key, $this->data)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -81,7 +88,7 @@ class DefaultRules implements DefaultRulesInterface
      */
     public function isArray(string $key, bool $nullable = false): bool
     {
-        if ($nullable && ! $this->isRequired($key)) {
+        if ($nullable && $this->isNullable($key)) {
             return true;
         }
 
@@ -94,7 +101,7 @@ class DefaultRules implements DefaultRulesInterface
 
     public function isAssoc(string $key, bool $nullable = false): bool
     {
-        if ($nullable && ! $this->isRequired($key)) {
+        if ($nullable && $this->isNullable($key)) {
             return true;
         }
 
@@ -108,16 +115,17 @@ class DefaultRules implements DefaultRulesInterface
     /**
      * @param string $key
      * @param bool $nullable
+     * @param null $data
      * @return bool
      */
-    public function isString(string $key, bool $nullable = false): bool
+    public function isString(string $key, bool $nullable = false, $data = null): bool
     {
-        if ($nullable && ! $this->isRequired($key)) {
+        if ($nullable && $this->isNullable($key)) {
             return true;
         }
 
         if ($this->isRequired($key)) {
-            return is_string($this->data[$key]);
+            return is_string($data ?? $this->data[$key]);
         }
 
         return false;
@@ -126,16 +134,17 @@ class DefaultRules implements DefaultRulesInterface
     /**
      * @param string $key
      * @param bool $nullable
+     * @param null $data
      * @return bool
      */
-    public function isNumeric(string $key, bool $nullable = false): bool
+    public function isNumeric(string $key, bool $nullable = false, $data = null): bool
     {
-        if ($nullable && ! $this->isRequired($key)) {
+        if ($nullable && $this->isNullable($key)) {
             return true;
         }
 
         if ($this->isRequired($key)) {
-            return is_numeric($this->data[$key]);
+            return is_numeric($data ?? $this->data[$key]);
         }
 
         return false;
@@ -148,7 +157,7 @@ class DefaultRules implements DefaultRulesInterface
      */
     public function isDistinct(string $key, bool $nullable = false): bool
     {
-        if ($nullable && ! $this->isRequired($key)) {
+        if ($nullable && $this->isNullable($key)) {
             return true;
         }
 
@@ -162,16 +171,17 @@ class DefaultRules implements DefaultRulesInterface
     /**
      * @param string $key
      * @param bool $nullable
+     * @param null $data
      * @return bool
      */
-    public function isInteger(string $key, bool $nullable = false): bool
+    public function isInteger(string $key, bool $nullable = false, $data = null): bool
     {
-        if ($nullable && ! $this->isRequired($key)) {
+        if ($nullable && $this->isNullable($key)) {
             return true;
         }
 
         if ($this->isRequired($key) && $this->isNumeric($key)) {
-            return is_int($this->data[$key]);
+            return is_int($data ?? $this->data[$key]);
         }
 
         return false;
@@ -180,16 +190,17 @@ class DefaultRules implements DefaultRulesInterface
     /**
      * @param string $key
      * @param bool $nullable
+     * @param null $data
      * @return bool
      */
-    public function isFloat(string $key, bool $nullable = false): bool
+    public function isFloat(string $key, bool $nullable = false, $data = null): bool
     {
-        if ($nullable && ! $this->isRequired($key)) {
+        if ($nullable && $this->isNullable($key)) {
             return true;
         }
 
         if ($this->isRequired($key) && $this->isNumeric($key)) {
-            return is_float($this->data[$key]);
+            return is_float($data ?? $this->data[$key]);
         }
 
         return false;
@@ -198,16 +209,17 @@ class DefaultRules implements DefaultRulesInterface
     /**
      * @param string $key
      * @param bool $nullable
+     * @param null $data
      * @return bool
      */
-    public function isBoolean(string $key, bool $nullable = false): bool
+    public function isBoolean(string $key, bool $nullable = false, $data = null): bool
     {
-        if ($nullable && ! $this->isRequired($key)) {
+        if ($nullable && $this->isNullable($key)) {
             return true;
         }
 
         if ($this->isRequired($key)) {
-            return is_bool($this->data[$key]);
+            return is_bool($data ?? $this->data[$key]);
         }
 
         return false;
@@ -221,7 +233,7 @@ class DefaultRules implements DefaultRulesInterface
      */
     public function isSize(string $key, int $length, bool $nullable = false): bool
     {
-        if ($nullable && ! $this->isRequired($key)) {
+        if ($nullable && $this->isNullable($key)) {
             return true;
         }
 
@@ -240,7 +252,7 @@ class DefaultRules implements DefaultRulesInterface
      */
     public function isMax(string $key, int $value, bool $nullable = false): bool
     {
-        if ($nullable && ! $this->isRequired($key)) {
+        if ($nullable && $this->isNullable($key)) {
             return true;
         }
 
@@ -259,12 +271,136 @@ class DefaultRules implements DefaultRulesInterface
      */
     public function isMin(string $key, int $value, bool $nullable = false): bool
     {
-        if ($nullable && ! $this->isRequired($key)) {
+        if ($nullable && $this->isNullable($key)) {
             return true;
         }
 
         if ($this->isRequired($key) && $this->isNumeric($key)) {
             return $this->data[$key] <= $value;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $key
+     * @param $value
+     * @param bool $nullable
+     * @return bool
+     */
+    public function isGt(string $key, $value, bool $nullable = false): bool
+    {
+        if ($nullable && $this->isNullable($key)) {
+            return true;
+        }
+
+        if ($this->isRequired($key) && $this->isNumeric($key)) {
+            return $this->data[$key] > $value;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $key
+     * @param $value
+     * @param bool $nullable
+     * @return bool
+     */
+    public function isGte(string $key, $value, bool $nullable = false): bool
+    {
+        if ($nullable && $this->isNullable($key)) {
+            return true;
+        }
+
+        if ($this->isRequired($key) && $this->isNumeric($key)) {
+            return $this->data[$key] >= $value;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $key
+     * @param $value
+     * @param bool $nullable
+     * @return bool
+     */
+    public function isLt(string $key, $value, bool $nullable = false): bool
+    {
+        if ($nullable && $this->isNullable($key)) {
+            return true;
+        }
+
+        if ($this->isRequired($key) && $this->isNumeric($key)) {
+            return $this->data[$key] < $value;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $key
+     * @param $value
+     * @param bool $nullable
+     * @return bool
+     */
+    public function isLte(string $key, $value, bool $nullable = false): bool
+    {
+        if ($nullable && $this->isNullable($key)) {
+            return true;
+        }
+
+        if ($this->isRequired($key) && $this->isNumeric($key)) {
+            return $this->data[$key] <= $value;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $key
+     * @param string $type
+     * @param $value
+     * @param bool $nullable
+     * @return bool
+     */
+    public function isEq(string $key, string $type, $value, bool $nullable = false): bool
+    {
+        if ($nullable && $this->isNullable($key)) {
+            return true;
+        }
+
+        if ($type === 'integer') {
+            $value = (int) $value;
+        }
+
+        if ($type === 'float') {
+            $value = (float) $value;
+        }
+
+        if ($type === 'string') {
+            $value = (string) $value;
+        }
+
+        if ($type === 'boolean') {
+            $value = (bool) $value;
+        }
+
+
+        if ($this->isString($key, $nullable, $value)) {
+            return $this->data[$key] === (string) $value;
+        }
+
+        if ($this->isBoolean($key, $nullable, $value)) {
+            return $this->data[$key] === (bool) $value;
+        }
+        if ($this->isInteger($key, $nullable, $value)) {
+            return $this->data[$key] === (int) $value;
+        }
+
+        if ($this->isFloat($key, $nullable, $value)) {
+            return $this->data[$key] === (float) $value;
         }
 
         return false;

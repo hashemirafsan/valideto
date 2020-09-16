@@ -3,7 +3,10 @@
 
 namespace Hashemi\Valideto\Rules;
 
-
+/**
+ * Interface DefaultRulesInterface
+ * @package Hashemi\Valideto\Rules
+ */
 interface DefaultRulesInterface
 {
     public function setData(array $data): self;

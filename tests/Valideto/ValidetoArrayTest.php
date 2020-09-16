@@ -71,7 +71,6 @@ class ValidetoArrayTest extends TestCase
             'hobbies' => ['nullable', 'array']
         ]);
 
-        $validator->validate();
 
         self::assertSame($data, $validator->validate());
     }
