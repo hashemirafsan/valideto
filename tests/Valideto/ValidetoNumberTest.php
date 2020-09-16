@@ -257,4 +257,43 @@ class ValidetoNumberTest extends TestCase
 
         $this->assertSame($data, $validator->validate());
     }
+
+    public function testEqIntegerFailsMessage()
+    {
+        $data = [
+            'age' => 11.1
+        ];
+
+        $validator = new Valideto($data, [
+            'age' => ['eq:integer:11']
+        ]);
+
+        $validator->validate();
+
+        $this->assertSame([
+            'age' => [
+                'eq' => 'This age should be equal to 11'
+            ]
+        ], $validator->getErrorMessages());
+    }
+
+    public function testEqFloatFailsMessage()
+    {
+        $data = [
+            'age' => 11
+        ];
+
+        $validator = new Valideto($data, [
+            'age' => ['eq:float:11.1']
+        ]);
+
+        $validator->validate();
+
+        $this->assertSame([
+            'age' => [
+                'eq' => 'This age should be equal to 11.1'
+            ]
+        ], $validator->getErrorMessages());
+    }
+
 }

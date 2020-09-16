@@ -34,6 +34,7 @@ class DefaultRules implements DefaultRulesInterface
         'date',
         'array',
         'url',
+        'ip',
         'boolean',
         'date_format',
         'email',
@@ -401,6 +402,61 @@ class DefaultRules implements DefaultRulesInterface
 
         if ($this->isFloat($key, $nullable, $value)) {
             return $this->data[$key] === (float) $value;
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $key
+     * @param bool $nullable
+     * @return bool
+     */
+    public function isEmail(string $key, bool $nullable = false): bool
+    {
+        if ($nullable && $this->isNullable($key)) {
+            return true;
+        }
+
+        if ($this->isRequired($key)) {
+            return (bool) filter_var($this->data[$key], FILTER_VALIDATE_EMAIL);
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $key
+     * @param string $type
+     * @param bool $nullable
+     * @return bool
+     */
+    public function isIp(string $key, bool $nullable = false): bool
+    {
+        if ($nullable && $this->isNullable($key)) {
+            return true;
+        }
+
+        if ($this->isRequired($key)) {
+            return (bool) filter_var($this->data[$key], FILTER_VALIDATE_IP);
+        }
+
+        return false;
+    }
+
+    /**
+     * @param string $key
+     * @param bool $nullable
+     * @return bool
+     */
+    public function isUrl(string $key, bool $nullable = false): bool
+    {
+        if ($nullable && $this->isNullable($key)) {
+            return true;
+        }
+
+        if ($this->isRequired($key)) {
+            return (bool) filter_var($this->data[$key], FILTER_VALIDATE_URL);
         }
 
         return false;

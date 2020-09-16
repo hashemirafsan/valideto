@@ -46,7 +46,10 @@ abstract class ValidetoEngine
         'gte' => 'This :attribute should be greater than or equal to :value',
         'lt' => 'This :attribute should be less than :value',
         'lte' => 'This :attribute should be less than or equal to :value',
-        'eq' => 'This :attribute should be equal to :value'
+        'eq' => 'This :attribute should be equal to :value',
+        'email' => 'This :attribute is not valid email',
+        'url' => 'This :attribute is not valid url',
+        'ip' => 'This :attribute is not valid ip'
     ];
 
     public function setRulesClass(DefaultRulesInterface $rulesClass): ValidetoEngine

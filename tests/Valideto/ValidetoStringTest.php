@@ -71,4 +71,37 @@ class ValidetoStringTest extends TestCase
             ]
         ], $validator->getErrorMessages());
     }
+
+    public function testEqString()
+    {
+        $data = [
+            'name' => 'Hashemi Rafsan'
+        ];
+
+        $validator = new Valideto($data, [
+            'name' => ['eq:string:Hashemi Rafsan']
+        ]);
+
+        $this->assertSame($data, $validator->validate());
+    }
+
+    public function testEqStringFailsMessage()
+    {
+        $data = [
+            'name' => 'Rafsan Jani'
+        ];
+
+        $validator = new Valideto($data, [
+            'name' => ['eq:string:Hashemi Rafsan']
+        ]);
+
+        $validator->validate();
+
+        $this->assertSame([
+            'name' => [
+                'eq' => 'This name should be equal to Hashemi Rafsan'
+            ]
+        ], $validator->getErrorMessages());
+    }
+
 }
