@@ -106,10 +106,32 @@ abstract class ValidetoEngine
         return $this->rulesClass;
     }
 
+    /**
+     * @param array $data
+     * @return $this
+     */
     abstract public function setData(array $data): self;
+
+    /**
+     * @return array
+     */
     abstract public function getData(): array;
+
+    /**
+     * @param array $rules
+     * @return $this
+     */
     abstract public function setRules(array $rules): self;
+
+    /**
+     * @return array
+     */
     abstract public function getRules(): array;
+
+    /**
+     * @param array $messages
+     * @return $this
+     */
     abstract public function setMessages(array $messages): self;
 
     /**
